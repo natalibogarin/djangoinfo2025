@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inicio - Mi Blog Personal{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block contenido %}
+<!-- Sección Hero -->
+<section class="hero-section bg-primary text-white py-5 rounded mb-5">
+  <div class="container text-center py-5">
+    <h1 class="display-4 fw-bold mb-3">Bienvenido a Mi Blog</h1>
+    <p class="lead mb-4">Compartiendo conocimientos sobre tecnología, programación y desarrollo web</p>
+    <a href="{% url 'posts' %}" class="btn btn-light btn-lg">
+      <i class="bi bi-book"></i> Explorar Artículos
+    </a>
+  </div>
+</section>
+
+<!-- Últimos Posts -->
+<section class="latest-posts mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h3 fw-bold">
+      <i class="bi bi-clock-history text-primary"></i> Últimos Artículos
+    </h2>
+    <a href="{% url 'posts' %}" class="btn btn-outline-primary">
+      Ver todos <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+
+  {% if ultimos_posts %}
+    <div class="row g-4">
+      {% for post in ultimos_posts %}
+        <div class="col-md-4">
+          <div class="card h-100 shadow-sm border-0 hover-card" style="transition: transform 0.3s;">
+            <div class="card-img-top bg-gradient" style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">
+              <i class="bi bi-file-text text-white" style="font-size: 3rem;"></i>
+            </div>
+            <div class="card-body">
+              <div class="mb-2">
+                {% for categoria in post.categorias.all|slice:":2" %}
+                  <span class="badge bg-primary me-1">{{ categoria.nombre }}</span>
+                {% endfor %}
+              </div>
+              <h5 class="card-title fw-bold">
+                <a href="{% url 'post-detalle' post.id %}" class="text-decoration-none text-dark">
+                  {{ post.titulo }}
+                </a>
+              </h5>
+              <p class="card-text text-muted">
+                {{ post.contenido|truncatechars:120|safe }}
+              </p>
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <small class="text-muted">
+                  <i class="bi bi-person"></i> {{ post.autor_post.nombre }}
+                </small>
+                <small class="text-muted">
+                  <i class="bi bi-calendar"></i> {{ post.fecha_publicacion|date:"d M Y" }}
+                </small>
+              </div>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+              <a href="{% url 'post-detalle' post.id %}" class="btn btn-outline-primary btn-sm w-100">
+                Leer más <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center">
+      <i class="bi bi-info-circle me-2"></i>
+      No hay artículos publicados todavía. ¡Vuelve pronto!
+    </div>
+  {% endif %}
+</section>
+
+<!-- Categorías -->
+{% if categorias %}
+<section class="categories-section mb-5">
+  <h2 class="h3 fw-bold mb-4">
+    <i class="bi bi-tags text-primary"></i> Explora por Categorías
+  </h2>
+  <div class="row g-3">
+    {% for categoria in categorias %}
+      <div class="col-md-3 col-sm-6">
+        <a href="{% url 'posts-categoria' categoria.id %}" class="text-decoration-none">
+          <div class="card border-0 shadow-sm text-center p-3 h-100" style="transition: transform 0.3s;">
+            <div class="card-body">
+              <i class="bi bi-folder text-primary mb-2" style="font-size: 2rem;"></i>
+              <h6 class="card-title mb-0">{{ categoria.nombre }}</h6>
+            </div>
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<style>
+  .hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  .hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  }
+  .card {
+    transition: transform 0.3s;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+  }
+</style>
+
+{% endblock %}

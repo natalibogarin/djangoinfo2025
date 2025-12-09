@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Artículos de {{ autor.nombre }} - Mi Blog Personal{% endblock %}
+
+{% block contenido %}
+<div class="row">
+  <!-- Columna principal con los posts -->
+  <div class="col-lg-8">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'index' %}">Inicio</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'posts' %}">Artículos</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ autor.nombre }}</li>
+      </ol>
+    </nav>
+
+    <!-- Información del autor -->
+    <div class="card border-0 bg-light mb-4">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="author-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 100px; height: 100px; font-size: 3rem;">
+            <i class="bi bi-person"></i>
+          </div>
+          <div>
+            <h1 class="h3 mb-1">{{ autor.nombre }}</h1>
+            {% if autor.biografia %}
+              <p class="text-muted mb-2">{{ autor.biografia }}</p>
+            {% endif %}
+            {% if autor.email %}
+              <small class="text-muted">
+                <i class="bi bi-envelope"></i> {{ autor.email }}
+              </small>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="h4 fw-bold">
+        <i class="bi bi-journal-text text-primary"></i> Artículos de {{ autor.nombre }}
+      </h2>
+      <span class="badge bg-primary">{{ page_obj.paginator.count }} artículos</span>
+    </div>
+
+    {% if page_obj %}
+      <!-- Lista de posts -->
+      {% for post in page_obj %}
+        <article class="card mb-4 shadow-sm border-0">
+          <div class="row g-0">
+            <div class="col-md-4">
+              <div class="post-image bg-gradient d-flex align-items-center justify-content-center" style="height: 100%; min-height: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <i class="bi bi-file-earmark-text text-white" style="font-size: 4rem;"></i>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="card-body">
+                <div class="mb-2">
+                  {% for categoria in post.categorias.all|slice:":3" %}
+                    <a href="{% url 'posts-categoria' categoria.id %}" class="badge bg-primary text-decoration-none me-1">
+                      {{ categoria.nombre }}
+                    </a>
+                  {% endfor %}
+                </div>
+                <h3 class="card-title h4 fw-bold">
+                  <a href="{% url 'post-detalle' post.id %}" class="text-dark text-decoration-none">
+                    {{ post.titulo }}
+                  </a>
+                </h3>
+                <p class="card-text text-muted">
+                  {{ post.contenido|truncatechars:200|safe }}
+                </p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <div class="post-meta text-muted small">
+                    <i class="bi bi-calendar3"></i> {{ post.fecha_publicacion|date:"d M Y" }}
+                    {% if post.comentarios.count > 0 %}
+                      <span class="mx-2">|</span>
+                      <i class="bi bi-chat-dots"></i> {{ post.comentarios.count }} comentarios
+                    {% endif %}
+                  </div>
+                  <a href="{% url 'post-detalle' post.id %}" class="btn btn-outline-primary btn-sm">
+                    Leer más <i class="bi bi-arrow-right"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+
+      <!-- Paginación -->
+      {% if page_obj.has_other_pages %}
+        <nav aria-label="Navegación de páginas">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1">
+                  <i class="bi bi-chevron-double-left"></i>
+                </a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                  <i class="bi bi-chevron-left"></i>
+                </a>
+              </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+                <li class="page-item active">
+                  <span class="page-link">{{ num }}</span>
+                </li>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                  <i class="bi bi-chevron-right"></i>
+                </a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                  <i class="bi bi-chevron-double-right"></i>
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+
+    {% else %}
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        Este autor no ha publicado artículos todavía.
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Sidebar -->
+  <div class="col-lg-4">
+    <!-- Categorías -->
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body">
+        <h5 class="card-title fw-bold mb-3">
+          <i class="bi bi-tags text-primary"></i> Categorías
+        </h5>
+        {% if categorias %}
+          <ul class="list-group list-group-flush">
+            {% for categoria in categorias %}
+              <li class="list-group-item px-0 border-0">
+                <a href="{% url 'posts-categoria' categoria.id %}" class="text-decoration-none d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-folder me-2"></i>{{ categoria.nombre }}</span>
+                  <span class="badge bg-primary rounded-pill">{{ categoria.posts.count }}</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Volver -->
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body">
+        <h5 class="card-title fw-bold mb-3">
+          <i class="bi bi-arrow-left-circle text-primary"></i> Navegación
+        </h5>
+        <div class="d-grid gap-2">
+          <a href="{% url 'posts' %}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Ver todos los artículos
+          </a>
+          <a href="{% url 'index' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-house"></i> Ir al inicio
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .card {
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+  }
+  .post-image {
+    border-radius: 0.375rem 0 0 0.375rem;
+  }
+</style>
+
+{% endblock %}

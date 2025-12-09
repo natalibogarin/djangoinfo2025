@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ post.titulo }} - Mi Blog Personal{% endblock %}
+
+{% block contenido %}
+<div class="row">
+  <!-- Artículo principal -->
+  <div class="col-lg-8">
+    <article class="post-detail mb-5">
+      <!-- Encabezado del artículo -->
+      <header class="mb-4">
+        <div class="mb-3">
+          {% for categoria in post.categorias.all %}
+            <a href="{% url 'posts-categoria' categoria.id %}" class="badge bg-primary text-decoration-none me-1">
+              {{ categoria.nombre }}
+            </a>
+          {% endfor %}
+        </div>
+        <h1 class="display-5 fw-bold mb-3">{{ post.titulo }}</h1>
+
+        <div class="post-meta d-flex align-items-center text-muted mb-3 pb-3 border-bottom">
+          <div class="author-info d-flex align-items-center me-4">
+            <div class="author-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 50px; height: 50px; font-size: 1.5rem;">
+              <i class="bi bi-person"></i>
+            </div>
+            <div>
+              <a href="{% url 'posts-autor' post.autor_post.id_autor %}" class="text-decoration-none text-dark fw-bold d-block">
+                {{ post.autor_post.nombre }}
+              </a>
+              <small class="text-muted">
+                <i class="bi bi-calendar3"></i> {{ post.fecha_publicacion|date:"d M Y" }}
+              </small>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Contenido del artículo -->
+      <div class="post-content mb-5">
+        <div class="featured-image mb-4 bg-gradient d-flex align-items-center justify-content-center rounded" style="height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          <i class="bi bi-file-earmark-text text-white" style="font-size: 6rem;"></i>
+        </div>
+
+        <div class="content-text" style="font-size: 1.1rem; line-height: 1.8; color: #333;">
+          {{ post.contenido|safe }}
+        </div>
+      </div>
+
+      <!-- Información del autor -->
+      <div class="card border-0 bg-light mb-5">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="author-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+              <i class="bi bi-person"></i>
+            </div>
+            <div>
+              <h5 class="mb-1">{{ post.autor_post.nombre }}</h5>
+              {% if post.autor_post.biografia %}
+                <p class="text-muted mb-0">{{ post.autor_post.biografia }}</p>
+              {% else %}
+                <p class="text-muted mb-0">Autor del blog</p>
+              {% endif %}
+              {% if post.autor_post.email %}
+                <small class="text-muted">
+                  <i class="bi bi-envelope"></i> {{ post.autor_post.email }}
+                </small>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección de comentarios -->
+      {% if comentarios %}
+        <section class="comments-section mb-5">
+          <h3 class="h4 fw-bold mb-4">
+            <i class="bi bi-chat-dots text-primary"></i> Comentarios ({{ comentarios.count }})
+          </h3>
+
+          {% for comentario in comentarios %}
+            <div class="comment mb-4 pb-3 border-bottom">
+              <div class="d-flex mb-2">
+                <div class="comment-avatar bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                  <i class="bi bi-person"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>{{ comentario.autor_comentario.username }}</strong>
+                    <small class="text-muted">
+                      <i class="bi bi-clock"></i> {{ comentario.fecha_comentario|date:"d M Y H:i" }}
+                    </small>
+                  </div>
+                  <p class="mb-2">{{ comentario.contenido_comentario }}</p>
+
+                  <!-- Respuestas a comentarios -->
+                  {% if comentario.respuestas.all %}
+                    <div class="replies ms-4 mt-3">
+                      {% for respuesta in comentario.respuestas.all %}
+                        <div class="reply mb-3 p-3 bg-light rounded">
+                          <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong class="small">{{ respuesta.autor_comentario.username }}</strong>
+                            <small class="text-muted">
+                              {{ respuesta.fecha_comentario|date:"d M Y H:i" }}
+                            </small>
+                          </div>
+                          <p class="mb-0 small">{{ respuesta.contenido_comentario }}</p>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </section>
+      {% endif %}
+    </article>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="col-lg-4">
+    <!-- Artículos relacionados -->
+    {% if relacionados %}
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+          <h5 class="card-title fw-bold mb-3">
+            <i class="bi bi-bookmarks text-primary"></i> Artículos Relacionados
+          </h5>
+          <div class="list-group list-group-flush">
+            {% for item in relacionados %}
+              <a href="{% url 'post-detalle' item.id %}" class="list-group-item list-group-item-action border-0 px-0">
+                <div class="d-flex w-100 justify-content-between align-items-start mb-1">
+                  <h6 class="mb-1">{{ item.titulo|truncatechars:60 }}</h6>
+                </div>
+                <small class="text-muted">
+                  <i class="bi bi-calendar3"></i> {{ item.fecha_publicacion|date:"d M Y" }}
+                </small>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Categorías -->
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body">
+        <h5 class="card-title fw-bold mb-3">
+          <i class="bi bi-tags text-primary"></i> Categorías
+        </h5>
+        {% if categorias %}
+          <ul class="list-group list-group-flush">
+            {% for categoria in categorias %}
+              <li class="list-group-item px-0 border-0">
+                <a href="{% url 'posts-categoria' categoria.id %}" class="text-decoration-none d-flex justify-content-between align-items-center">
+                  <span><i class="bi bi-folder me-2"></i>{{ categoria.nombre }}</span>
+                  <span class="badge bg-primary rounded-pill">{{ categoria.posts.count }}</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Compartir -->
+    <div class="card shadow-sm border-0 mb-4">
+      <div class="card-body">
+        <h5 class="card-title fw-bold mb-3">
+          <i class="bi bi-share text-primary"></i> Compartir
+        </h5>
+        <div class="d-grid gap-2">
+          <button class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-twitter"></i> Twitter
+          </button>
+          <button class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-facebook"></i> Facebook
+          </button>
+          <button class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-linkedin"></i> LinkedIn
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.375rem;
+  }
+  .post-content p {
+    margin-bottom: 1.5rem;
+  }
+  .post-content h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+  }
+  .post-content h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: bold;
+  }
+  .list-group-item:hover {
+    background-color: #f8f9fa;
+  }
+</style>
+
+{% endblock %}
