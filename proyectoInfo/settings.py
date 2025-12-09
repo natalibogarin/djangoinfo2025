@@ -57,7 +57,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'djangoinfo2025.urls'
+ROOT_URLCONF = 'proyectoInfo.urls'
 
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 TEMPLATES_BLOG = os.path.join(BASE_DIR, 'templates/blog')
@@ -78,7 +78,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'djangoinfo2025.wsgi.application'
+WSGI_APPLICATION = 'proyectoInfo.wsgi.application'
 
 
 # Database
